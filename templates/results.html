@@ -1,0 +1,646 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+>
+
+<title>
+Results · Taste Analyzer
+</title>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+>
+
+<link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+>
+
+</head>
+
+
+<body>
+
+
+<header class="topbar">
+
+<a
+    class="logo"
+    href="{{ url_for('home') }}"
+>
+
+<span>TA</span>
+
+Taste Analyzer
+
+</a>
+
+
+<nav>
+
+<a href="{{ url_for('favorites') }}">
+❤️ Favorites
+</a>
+
+<a href="{{ url_for('logout') }}">
+Log out
+</a>
+
+</nav>
+
+</header>
+
+
+
+<main class="results-page">
+
+
+<div class="page-heading">
+
+<div>
+
+<p class="eyebrow">
+SEARCH RESULTS
+</p>
+
+
+<h1>
+Restaurants near {{ location }}
+</h1>
+
+
+<p class="muted">
+
+{{ restaurants|length }}
+places found.
+
+Ranked using transparent Taste Analyzer scoring.
+
+</p>
+
+
+<div class="result-meta">
+
+<span class="meta-pill">
+
+📍 {{ location }}
+
+</span>
+
+
+{% if tastes %}
+
+<span class="meta-pill">
+
+🧠 {{ tastes|join(", ") }}
+
+</span>
+
+{% else %}
+
+<span class="meta-pill">
+
+🧠 No cuisine preference
+
+</span>
+
+{% endif %}
+
+
+<span class="meta-pill">
+
+🗺️ OpenStreetMap
+
+</span>
+
+</div>
+
+</div>
+
+
+<a
+    class="btn secondary"
+    href="{{ url_for('home') }}"
+>
+
+← New search
+
+</a>
+
+</div>
+
+
+
+{% if error %}
+
+<div class="alert error">
+
+{{ error }}
+
+</div>
+
+{% endif %}
+
+
+
+{% if restaurants %}
+
+
+<div id="map"></div>
+
+
+
+<form
+    method="post"
+    action="{{ url_for('add_selected_favorites') }}"
+>
+
+
+<div class="table-card">
+
+
+<div class="table-scroll">
+
+
+<table>
+
+
+<thead>
+
+<tr>
+
+<th>
+Select
+</th>
+
+<th>
+Restaurant
+</th>
+
+<th>
+Cuisine
+</th>
+
+<th>
+Distance
+</th>
+
+<th>
+Status
+</th>
+
+<th>
+Match
+</th>
+
+</tr>
+
+</thead>
+
+
+
+<tbody>
+
+
+{% for r in restaurants %}
+
+
+<tr>
+
+
+<td>
+
+
+<input
+    class="favorite-checkbox"
+    type="checkbox"
+    id="fav{{ loop.index }}"
+    name="selected_restaurants"
+    value="{{ loop.index }}"
+>
+
+
+<label
+    class="heart-toggle"
+    for="fav{{ loop.index }}"
+    title="Save restaurant"
+>
+
+♡
+
+
+</label>
+
+
+<input
+    type="hidden"
+    name="restaurant_name_{{ loop.index }}"
+    value="{{ r.name }}"
+>
+
+
+<input
+    type="hidden"
+    name="restaurant_cuisine_{{ loop.index }}"
+    value="{{ r.cuisine }}"
+>
+
+
+<input
+    type="hidden"
+    name="restaurant_distance_{{ loop.index }}"
+    value="{{ r.distance }}"
+>
+
+
+<input
+    type="hidden"
+    name="restaurant_lat_{{ loop.index }}"
+    value="{{ r.lat }}"
+>
+
+
+<input
+    type="hidden"
+    name="restaurant_lon_{{ loop.index }}"
+    value="{{ r.lon }}"
+>
+
+
+</td>
+
+
+
+<td>
+
+<div class="restaurant-name">
+
+{{ r.name }}
+
+</div>
+
+</td>
+
+
+
+<td>
+
+<div class="cuisine-text">
+
+{{ r.cuisine }}
+
+</div>
+
+</td>
+
+
+
+<td class="distance">
+
+<strong>
+
+📍 {{ r.distance }} km
+
+</strong>
+
+<span class="muted">
+
+from search location
+
+</span>
+
+</td>
+
+
+
+<td>
+
+
+{% if r.opening_hours %}
+
+<div class="hours">
+
+<span>
+
+🕐 Hours listed
+
+</span>
+
+<small>
+
+{{ r.opening_hours }}
+
+</small>
+
+</div>
+
+{% else %}
+
+<span class="no-hours">
+
+Hours not listed
+
+</span>
+
+{% endif %}
+
+
+</td>
+
+
+
+<td>
+
+
+<div class="match-wrap">
+
+
+<span class="score">
+
+{{ r.score }}% Match
+
+</span>
+
+
+{% if r.match_reasons %}
+
+<span class="match-reason">
+
+{{ r.match_reasons|join(" · ") }}
+
+</span>
+
+{% endif %}
+
+
+</div>
+
+
+</td>
+
+
+</tr>
+
+
+{% endfor %}
+
+
+</tbody>
+
+</table>
+
+
+</div>
+
+
+
+<div class="action-bar">
+
+
+<span class="muted">
+
+Select restaurants using the heart button.
+
+</span>
+
+
+<button
+    class="btn primary"
+    type="submit"
+>
+
+❤️ Save selected
+
+</button>
+
+
+</div>
+
+
+
+<div class="data-note">
+
+<strong>
+How does the Match score work?
+</strong>
+
+When you select cuisines, the algorithm gives up to
+<strong>70 points</strong> for cuisine compatibility and
+<strong>30 points</strong> for distance.
+
+The ranking is therefore explainable and does not depend
+on fake or unavailable ratings.
+
+<br><br>
+
+<strong>
+Data:
+</strong>
+
+Restaurant locations, cuisines and opening hours are
+taken from OpenStreetMap.
+
+</div>
+
+
+</div>
+
+
+</form>
+
+
+{% else %}
+
+
+<div class="empty-state">
+
+<div class="empty-icon">
+🍽️
+</div>
+
+
+<h2>
+No restaurants found
+</h2>
+
+
+<p>
+
+Try another city, neighborhood, landmark,
+PIN code or a broader location.
+
+</p>
+
+
+<a
+    class="btn primary"
+    href="{{ url_for('home') }}"
+>
+
+Try another search
+
+</a>
+
+</div>
+
+
+{% endif %}
+
+
+</main>
+
+
+
+<script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+></script>
+
+
+
+{% if restaurants %}
+
+<script>
+
+const lat = {{ lat|tojson }};
+
+const lon = {{ lon|tojson }};
+
+const restaurants =
+    {{ restaurants|tojson }};
+
+
+
+const map =
+    L.map("map").setView(
+        [lat, lon],
+        13
+    );
+
+
+
+L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+        maxZoom: 19,
+
+        attribution:
+            "&copy; OpenStreetMap contributors"
+    }
+).addTo(map);
+
+
+
+function escapeHtml(value) {
+
+    return String(value).replace(
+        /[&<>"']/g,
+
+        function(c) {
+
+            return {
+
+                "&":"&amp;",
+
+                "<":"&lt;",
+
+                ">":"&gt;",
+
+                '"':"&quot;",
+
+                "'":"&#039;"
+
+            }[c];
+
+        }
+    );
+}
+
+
+
+L.marker([lat, lon])
+
+    .addTo(map)
+
+    .bindPopup(
+
+        `<strong>
+        📍 Search location
+        </strong>
+        <br>
+        ${escapeHtml("{{ location }}")}`
+
+    )
+
+    .openPopup();
+
+
+
+restaurants.forEach(
+    function(r) {
+
+        if (r.lat && r.lon) {
+
+            let hours = "";
+
+            if (r.opening_hours) {
+
+                hours =
+                    `<br>🕐 ${
+                        escapeHtml(
+                            r.opening_hours
+                        )
+                    }`;
+
+            }
+
+
+            L.marker(
+                [r.lat, r.lon]
+            )
+
+            .addTo(map)
+
+            .bindPopup(
+
+                `<strong>
+                    ${escapeHtml(r.name)}
+                </strong>
+
+                <br>
+
+                ${escapeHtml(r.cuisine)}
+
+                <br>
+
+                📍 ${r.distance} km
+
+                <br>
+
+                🧠 ${r.score}% Match
+
+                ${hours}`
+
+            );
+
+        }
+
+    }
+);
+
+</script>
+
+{% endif %}
+
+
+</body>
+
+</html>

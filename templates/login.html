@@ -1,0 +1,172 @@
+<!doctype html>
+
+<html lang="en">
+
+<head>
+
+<meta charset="utf-8">
+
+<meta
+    name="viewport"
+    content="width=device-width,initial-scale=1"
+>
+
+<title>
+Sign In · Taste Analyzer
+</title>
+
+<link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='style.css') }}"
+>
+
+</head>
+
+
+<body>
+
+
+<main class="auth-page">
+
+
+<div class="auth-shell">
+
+
+<div class="auth-brand">
+
+<div class="brand-mark">
+TA
+</div>
+
+<strong>
+TASTE ANALYZER
+</strong>
+
+</div>
+
+
+
+<section class="auth-card">
+
+
+<p class="eyebrow">
+WELCOME BACK
+</p>
+
+
+<h1>
+Sign in
+</h1>
+
+
+<p class="muted">
+
+Discover restaurants that match your taste.
+
+</p>
+
+
+
+{% with messages =
+    get_flashed_messages(
+        with_categories=true
+    )
+%}
+
+{% for category, message in messages %}
+
+<div class="alert {{ category }}">
+
+{{ message }}
+
+</div>
+
+{% endfor %}
+
+{% endwith %}
+
+
+
+<form
+    method="post"
+    class="form-stack"
+>
+
+
+<div>
+
+<label for="email">
+Email address
+</label>
+
+
+<input
+    id="email"
+    name="email"
+    type="email"
+    placeholder="you@example.com"
+    autocomplete="email"
+    required
+>
+
+</div>
+
+
+
+<div>
+
+<label for="password">
+Password
+</label>
+
+
+<input
+    id="password"
+    name="password"
+    type="password"
+    placeholder="Your password"
+    autocomplete="current-password"
+    required
+>
+
+</div>
+
+
+
+<button
+    class="btn primary large"
+    type="submit"
+>
+
+Sign in →
+
+</button>
+
+
+</form>
+
+
+
+<p class="auth-footer">
+
+New to Taste Analyzer?
+
+<a href="{{ url_for('register') }}">
+Create an account
+</a>
+
+</p>
+
+
+</section>
+
+
+</div>
+
+
+</main>
+
+
+</body>
+
+</html>

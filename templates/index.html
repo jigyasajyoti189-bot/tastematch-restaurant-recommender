@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Taste Analyzer | Find Food You Love</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f9b0f, #38ef7d);
+            color: white;
+        }
+
+        .navbar {
+            width: 100%;
+            padding: 18px 6%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.15);
+        }
+
+        .logo {
+            font-size: 25px;
+            font-weight: bold;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 12px;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 9px 16px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-links a:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            width: 90%;
+            max-width: 850px;
+            margin: 55px auto;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 35px;
+        }
+
+        .hero h1 {
+            font-size: 45px;
+            margin-bottom: 12px;
+        }
+
+        .hero p {
+            font-size: 18px;
+            color: #eaffef;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.14);
+            backdrop-filter: blur(12px);
+            border-radius: 20px;
+            padding: 35px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .welcome {
+            text-align: center;
+            margin-bottom: 28px;
+            font-size: 18px;
+        }
+
+        .section {
+            margin-bottom: 28px;
+        }
+
+        .section-title {
+            font-size: 19px;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .location-input {
+            width: 100%;
+            padding: 15px 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .location-input:focus {
+            box-shadow: 0 0 0 3px rgba(255,255,255,0.35);
+        }
+
+        .current-location {
+            margin-top: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .current-location input {
+            width: 17px;
+            height: 17px;
+            cursor: pointer;
+        }
+
+        .cuisine-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+        }
+
+        .cuisine-option {
+            position: relative;
+        }
+
+        .cuisine-option input {
+            display: none;
+        }
+
+        .cuisine-option label {
+            display: block;
+            padding: 13px 10px;
+            text-align: center;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.15);
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .cuisine-option input:checked + label {
+            background: white;
+            color: #159447;
+            font-weight: bold;
+            transform: translateY(-2px);
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 12px;
+            background: white;
+            color: #159447;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.25s;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+
+        .hint {
+            margin-top: 8px;
+            font-size: 13px;
+            color: #e5ffe9;
+        }
+
+        .error {
+            background: rgba(255, 0, 0, 0.18);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+
+            .navbar {
+                padding: 15px 4%;
+            }
+
+            .nav-links a {
+                padding: 8px 10px;
+                font-size: 13px;
+            }
+
+            .hero h1 {
+                font-size: 34px;
+            }
+
+            .card {
+                padding: 22px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<nav class="navbar">
+
+    <div class="logo">
+        🍴 Taste Analyzer
+    </div>
+
+    <div class="nav-links">
+        <a href="/favorites">❤️ Favorites</a>
+        <a href="/logout">🚪 Logout</a>
+    </div>
+
+</nav>
+
+
+<div class="container">
+
+    <div class="hero">
+
+        <h1>Find Food You Love</h1>
+
+        <p>
+            Discover restaurants based on your taste and location.
+        </p>
+
+    </div>
+
+
+    <div class="card">
+
+        <div class="welcome">
+            Welcome,
+            <strong>{{ username }}</strong> 👋
+        </div>
+
+
+        {% if error %}
+
+        <div class="error">
+            {{ error }}
+        </div>
+
+        {% endif %}
+
+
+        <form action="/results" method="POST">
+
+
+            <!-- LOCATION -->
+
+            <div class="section">
+
+                <div class="section-title">
+                    📍 Where do you want to eat?
+                </div>
+
+                <input
+                    type="text"
+                    name="location"
+                    id="location"
+                    class="location-input"
+                    placeholder="Enter city, area or landmark"
+                    autocomplete="off"
+                    required
+                >
+
+                <div class="current-location">
+
+                    <input
+                        type="checkbox"
+                        id="useCurrentLocation"
+                    >
+
+                    <label for="useCurrentLocation">
+                        Use my current location
+                    </label>
+
+                </div>
+
+                <div class="hint">
+                    Example: Gurgaon, Mumbai, Noida, Connaught Place, Rishikesh
+                </div>
+
+            </div>
+
+
+            <!-- CUISINE -->
+
+            <div class="section">
+
+                <div class="section-title">
+                    🍽️ What do you want to eat?
+                </div>
+
+                <div class="cuisine-grid">
+
+                    {% for cuisine in cuisine_options %}
+
+                    <div class="cuisine-option">
+
+                        <input
+                            type="checkbox"
+                            id="cuisine-{{ loop.index }}"
+                            name="tastes"
+                            value="{{ cuisine }}"
+                        >
+
+                        <label for="cuisine-{{ loop.index }}">
+                            {{ cuisine }}
+                        </label>
+
+                    </div>
+
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+
+            <button
+                type="submit"
+                class="submit-btn"
+            >
+                🔍 Find Restaurants
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+const locationInput =
+    document.getElementById("location");
+
+const currentLocationCheckbox =
+    document.getElementById("useCurrentLocation");
+
+
+currentLocationCheckbox.addEventListener(
+    "change",
+    function () {
+
+        if (!this.checked) {
+            return;
+        }
+
+        if (!navigator.geolocation) {
+
+            alert(
+                "Your browser does not support location detection."
+            );
+
+            this.checked = false;
+
+            return;
+        }
+
+
+        this.disabled = true;
+
+        this.nextElementSibling.textContent =
+            "Detecting your location...";
+
+
+        navigator.geolocation.getCurrentPosition(
+
+            async function(position) {
+
+                const lat =
+                    position.coords.latitude;
+
+                const lon =
+                    position.coords.longitude;
+
+
+                try {
+
+                    const response =
+                        await fetch(
+                            "/detect_location",
+                            {
+                                method: "POST",
+
+                                headers: {
+                                    "Content-Type":
+                                        "application/json"
+                                },
+
+                                body: JSON.stringify({
+                                    lat: lat,
+                                    lon: lon
+                                })
+                            }
+                        );
+
+
+                    const data =
+                        await response.json();
+
+
+                    if (data.address) {
+
+                        locationInput.value =
+                            data.address;
+
+                    } else {
+
+                        alert(
+                            "Unable to detect your location."
+                        );
+
+                        currentLocationCheckbox.checked =
+                            false;
+                    }
+
+                } catch (error) {
+
+                    console.error(error);
+
+                    alert(
+                        "Unable to detect your location."
+                    );
+
+                    currentLocationCheckbox.checked =
+                        false;
+                }
+
+
+                currentLocationCheckbox.disabled =
+                    false;
+
+                currentLocationCheckbox.nextElementSibling.textContent =
+                    "Use my current location";
+
+            },
+
+            function(error) {
+
+                console.error(error);
+
+                alert(
+                    "Location permission was denied or unavailable."
+                );
+
+                currentLocationCheckbox.checked =
+                    false;
+
+                currentLocationCheckbox.disabled =
+                    false;
+
+                currentLocationCheckbox.nextElementSibling.textContent =
+                    "Use my current location";
+            }
+
+        );
+
+    }
+);
+
+</script>
+
+</body>
+</html>
