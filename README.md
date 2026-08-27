@@ -1,4 +1,4 @@
-# 🍴 Taste Analyzer
+# 🍴 # TasteMatch — Explainable Restaurant Recommendation System
 
 A responsive Flask web application that helps users discover nearby restaurants based on location and cuisine preferences.
 
